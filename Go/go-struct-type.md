@@ -87,10 +87,22 @@ fmt.Printf("hogeの型は%T\n", hoge)
 hogeの型はstruct {}
 ```
 
-以下のようなものの、IDやNameと言ったフィールドを持っていないものと考えれば良いかもしれない。
+ちなみに、struct{}にtypeで名前を付けると以下のようになる。
+
+```go
+func main() {
+	type User struct {
+	}
+
+	hoge := &User{}
+	fmt.Printf("hogeの型は%T\n", hoge)
+}
+```
+
+実行結果
 
 ```
-u := struct{}{ID: "hogehoge", Name: "太郎",}
+hogeの型は*main.User
 ```
 
 以下のような場合は、当たり前だがエラーが出る。
