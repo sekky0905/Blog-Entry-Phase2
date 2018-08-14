@@ -1,4 +1,4 @@
-# Goのstructとtype ~Goのstructの宣言にtypeをつける理由~
+# Goのstructとtype -Goのstructの宣言にtypeをつける理由-
 Goのstructとtypeについて簡単にまとめた。
 
 ## よくある構造体の宣言
