@@ -1,5 +1,3 @@
-# その設計、変更に強いですか?単体テストできますか?　そしてクリーンアーキテクチャ 
-
 # はじめに
 アーキテクチャや設計の書籍や記事、これまでの経験も踏まえ、学んだ事をここにまとめたい。(まだ、勉強中なので微妙なところもあるかもしれません。お気付きの点があればご指摘いただけるとありがたいです。)
 
@@ -17,10 +15,12 @@
 「単体テスト」については、「変更に強い」コードを意識すると「単体テスト」がしやすいという副次的な効果も現れることがわかったので、サブテーマとして記述したい。
 また、上記の2つを同時に満たしている思う最近何かと話題のクリーンアーキテクチャについても記述したい。
 
+正直、「変更に強くなる」というのをテーマに書こうとしたのだが、テストもしやすくなるし、最近学んだクリーンアーキテクチャもそれらに関係があることなので、書きたいし...となって少し詰め込みすぎた感が否めないですが、ご容赦ください。
+
 そのため、今回の記事はざっくり大きく以下の3つの編成にしている。
-・変更に強くなる編
-・単体テスト編
-・クリーンアーキテクチャ編
+・変更に強くなる編<br>
+・単体テスト編<br>
+・クリーンアーキテクチャ編<br>
 
 # 変更に強くなる編
 ここでは変更に強くなるための概念等を紹介する。
@@ -72,7 +72,7 @@ Robert C.Martin (著)、 角 征典  (翻訳)、 高木 正弘 (翻訳)　(2018/
 ## 一旦整理
 コードには依存関係があることもわかった。依存関係は循環参照することなく、片方向の参照が好ましいという。では、Aの具象クラスがBの具象クラスに依存し、Bの具象クラスがCの具象クラスに依存するというのは、どうだろうか。
 
-「共通性/可変性分析」のセクションで、具体的なこと(具象クラス)は、変化しやすいことを説明した。本記事の冒頭を思い出してほしい。数々の良書が「変化に強くなろう」と主張しているのにも関わらず、片方向とはいえ、変更しやすい具象クラスに依存するのは良いのだろうか。
+「共通性/可変性分析」のセクションで、具体的なこと(具象クラス)は、変化しやすいことを説明した。本記事の冒頭を思い出してほしい。数々の良書が「変化に強くなろう」と主張しているのにも関わらず、片方向とはいえ、変更されやすい具象クラスに依存するのは良いのだろうか。
 A=>B=>Cという風に依存関係があった場合、どれも具象クラスなので、変化しやすい。例えば、Cに変化があったら、Bはどうなるだろうか。Bに変化があったら、Aはどうなるだろうか...
 Bは、Cの変更に伴って、コードを変更しなくてはならないし、AもBの変更に伴ってコードを変更しなくてはならない...辛い...
 そりゃあ、数々の良書が「変更に強くなろう」というわけだ。「変更に強くなろう」というのは、「ある変更に伴いドミノ倒しのように発生する数々のコードの変更に耐えられる精神的な強さを持とう!」と言っているのだろうか。いや違う。ある変更があっても、他の部分に変更を(極力)生じさせない方法論を提唱してくれている。
@@ -84,6 +84,7 @@ Bは、Cの変更に伴って、コードを変更しなくてはならないし
 
 なお、この記事では、インターフェースとポリモーフィズム自体はある程度理解している前提で話を進めるので、それら自体の説明はあまりしない。
 もしインターフェースやポリモーフィズムが怪しい場合は、以下の記事等を参照。
+
 [オブジェクト指向と10年戦ってわかったこと - Qiita](https://qiita.com/tutinoco/items/6952b01e5fc38914ec4e#%E3%83%9D%E3%83%AA%E3%83%A2%E3%83%BC%E3%83%95%E3%82%A3%E3%82%BA%E3%83%A0)
 
 [15分でわかる かんたんオブジェクト指向 - Qiita](https://qiita.com/koher/items/6878c80014992900add7#%E3%83%9D%E3%83%AA%E3%83%A2%E3%83%BC%E3%83%95%E3%82%A3%E3%82%BA%E3%83%A0)
@@ -102,11 +103,17 @@ Bは、Cの変更に伴って、コードを変更しなくてはならないし
 > ソフトウエアモジュールを疎結合に保つための特定の形式を指す用語. この原則に従うとソフトウェアの振る舞いを定義する上位レベルのモジュールから下位レベルモジュールへの従来の依存関係は逆転し、結果として下位レベルモジュールの実装の詳細から上位レベルモジュールを独立に保つことができるようになる. この原則で述べられていることは以下の２つである
 
 > A. 上位レベルのモジュールは下位レベルのモジュールに依存すべきではない. 両方とも抽象（abstractions)に依存すべきである.
+
 > B. 抽象は詳細に依存してはならない. 詳細が抽象に依存すべきである.
 
 引用元 : [依存性逆転の原則 - Wikipedia](https://ja.wikipedia.org/wiki/%E4%BE%9D%E5%AD%98%E6%80%A7%E9%80%86%E8%BB%A2%E3%81%AE%E5%8E%9F%E5%89%87)
 
-依存関係逆転の法則は、 `インターフェース` で `ポリモーフィズム` を用いて、モジュール間の結合度を緩やかにするためのもの。もっと具体的にいうと、別のレイヤーのクラスなどを使用するときには、その具象クラスを直接使うのではなく、そのインターフェースを参照しようねということ。AというクラスがBというクラスを利用するときに、Bを直接利用するのではなくて、Aの抽象(抽象クラスやインターフェイス)を利用するとBの実装に変更があっても左右されにくいので、そういう風にしましょうということ。UMLでAからBに向かってる矢印が、AがBの抽象のインターフェースに依存し、Bはそのインターフェースを実装することになるので、矢印が逆向きになるため依存関係逆転の法則というらしい。(具体的なUMLは、具体例で提示する)
+依存関係逆転の法則は、 `インターフェース` で `ポリモーフィズム` を用いて、モジュール間の結合度を緩やかにするためのもの。もっと具体的にいうと、別のレイヤーのクラスなどを使用するときには、その具象クラスを直接使うのではなく、そのインターフェースを参照しようねということ。AというクラスがBというクラスを利用するときに、Bを直接利用するのではなくて、Aの抽象(抽象クラスやインターフェイス)を利用するとBの実装に変更があっても左右されにくいので、そういう風にしましょうということ。
+
+「共通性/可変性分析とインターフェースとポリモーフィズム」のセクションで記述した事を原則として切り出したものだ。
+「変更に強くなる」とか、「単体テストをしやすくする」などの事を考えると、この原則は本当に重要なものだ。
+
+なぜ依存関係の **逆転** というかは、この後の具体例のところでUMLぽいものを書いて説明する。
 
 参考:
 [クリーンアーキテクチャ(The Clean Architecture翻訳) | blog.tai2.net](https://blog.tai2.net/the_clean_architecture.html)
@@ -119,7 +126,8 @@ Bは、Cの変更に伴って、コードを変更しなくてはならないし
 
 
 ### 具体例
-コードを使用して具体例を示す。コードはGoで記述する。Goにこれまで馴染みのない方もそこまで
+コードを使用して具体例を示す。コードはGoで記述する。Goにこれまで馴染みのない方もなんとなくコードを見ればわかるかと思う。
+
 これは後ほど記述するクリーンアーキテクチャで記述したコードの一部を切り取ったものだ。
 クリーンアーキテクチャやコード全体は後述する。
 この例では、ユースケースであるProgrammingLangUseCaseから使用されるデータベース周りの具体的な操作を行う構造体に焦点を当てる。
@@ -131,11 +139,19 @@ ProgrammingLangUseCaseは、ProgrammingLangRepositoryは知っているが、Pro
 なので、その部分はProgrammingLangRepositoryを実装している構造体ならば、何にでも差し替えることができる。
 例えば、今回は、ProgrammingLangDAOはRDB(MySQL)の操作を実装しているが、ProgrammingLangRepositoryのインターフェースを満たしたNoSQLを操作する構造体に差し替えることもできるかもしれないし、メモリに保存する構造体に差し替えすることもできる。また、単体テストの際に、モックに差し替えることができる。これは単体テストを行う際には大きなメリットとなる。(単体テストについては後述する)
 
-!注意1 : なんとなくUML図ぽく買いたものである。(厳密なUML図ではない)
-!注意2 : 実際のコードにはもう少しメソッドがあるが、説明のためだけの図なので、図には書かない。
+クラス図ぽいものを描くと以下のようなものになる。
 
-ProgrammingLangUseCase
 
+![CleanArch.png](https://qiita-image-store.s3.amazonaws.com/0/145611/46c0f51b-5fa4-ad15-e33d-cbf9b38c3945.png)
+
+
+上記のUMLのようにProgrammingLangUseCase(上位のレイヤー)がProgrammingLangDAOや、MockProgrammingLangRepository(下位レイヤー)に直接依存するのではなく、ProgrammingLangRepository(下位レイヤーの抽象)に依存し、ProgrammingLangDAOや、MockProgrammingLangRepository(下位レイヤー)は、ProgrammingLangRepository(下位レイヤーの抽象)の実装のため、下位レイヤーから下位レイヤーの抽象へ矢印が逆向きになるため、依存関係逆転の法則というらしい。
+
+!注意1 : なんとなくUML図ぽく買いたものである。(厳密なUML図ではない)<br>
+!注意2 : 実際のコードにはもう少しメソッドがあるが、説明のためだけの図なので、図には書かない。<br>
+
+#### ProgrammingLangUseCase(上位レイヤ)
+ProgrammingLangUseCase は、ProgrammingLangRepositoryを通して、ProgrammingLangDAOやMockProgrammingLangRepositoryを使用する。そのため、ProgrammingLangUseCase は、直接的には、具象であるProgrammingLangDAOやMockProgrammingLangRepositoryを知らない。
 
 ```go:program_lang_usecase.go
 
@@ -228,7 +244,7 @@ func (u *ProgrammingLangUseCase) Delete(ctx context.Context, id int) error {
 
 ```
 
-#### インターフェース部分
+#### ProgrammingLangRepository(インターフェース部分)
 ここでは、実際のデータベースの操作のインターフェースを定義している。個々のデータベースの操作(例えば、MySQLやPostgreSQL、あるいはそれを模したモックなど)という具体的なことに対して、ここで定義しているのは、データベースの操作をまとめた抽象的なものであることに注目して欲しい。これは、具体的なものが共通でもつ変わりにくい抽象的な部分をインターフェースで表したものだ。
 
 ```go:program_lang_repository.go
@@ -251,7 +267,7 @@ type ProgrammingLangRepository interface {
 }
 ```
 
-#### データベース操作実装部分
+#### ProgrammingLangDAO(データベース操作実装部分)
 具体的なSQL型のデータベースの操作を行う構造体(Javaとかでいうところのクラスみたいなもの)。
 `ProgrammingLangRepository` で定義した各メソッドを実装している。ProgrammingLangDAOは、ProgrammingLangRepositoryを満たしているので、ProgrammingLangRepositoryとして使用することができる。
 
@@ -464,9 +480,9 @@ func (dao *ProgrammingLangDAO) Delete(ctx context.Context, id int) error {
 
 
 
-#### モック
+#### MockProgrammingLangRepository(モック)
 データベースの操作を模したモック。
-[golang](https://github.com/golang/mock)というモック用のツールで自動生成している。
+[gomock](https://github.com/golang/mock)というモック生成用のツールで自動生成している。
 モックの構造体もProgrammingLangRepositoryを満たしているので、ProgrammingLangRepositoryとして使用することができる。実際にProgrammingLangRepository(の実装)を使用するレイヤーのテストをする際には、ProgrammingLangRepositoryの実装としてProgrammingLangDAOではなく、このモックを使用する。
 
 ```go:program_lang_repository_mock.go
@@ -630,12 +646,11 @@ A=>B=>Cという依存関係がコードがあるとする。AはBに依存し�
 実際の例は、先ほどのDIP(依存関係逆転の法則)のセクションで示したものを参照いただきたい。原理としては、Aの単体テストをする際に、依存しているBやCをそのまま使うのではなく、Bをモックに入れ替えている。
 これは、AからBを利用する際に、Bの具象クラスをそのまま利用するのではなくて、Bの具象クラスがその実装となるインターフェイスを定義して、それをAは利用しているからなせる技だ。
 
-具体的にいうとProgrammingLangRepositoryというインターフェースを定義し、製品コードではこのProgrammingLangRepositoryの実装であるProgrammingLangDAOを使用してDBの操作を行い、ProgrammingLangUseCaseのテストでは、ProgrammingLangRepository実装であるProgrammingLangRepositoryMockに差し替えているのだ。
+具体的にいうとProgrammingLangRepositoryというインターフェースを定義し、製品コードではこのProgrammingLangRepositoryの実装であるProgrammingLangDAOを使用してDBの操作を行い、ProgrammingLangUseCaseのテストでは、ProgrammingLangRepository実装であるMockProgrammingLangRepositoryに差し替えているのだ。
 モックもインターフェースを実装した具象クラスの1つであるというわけだ。
 
-**ProgrammingLangDAO is a ProgrammingLanRepository** だし、
-**ProgrammingLangRepositoryMock is a ProgrammingLanRepository** でもあるという事だ。
-
+**ProgrammingLangDAO is a ProgrammingLanRepository** であり、<br>
+**MockProgrammingLangRepository is a ProgrammingLanRepository** でもあるという事だ。
 
 # クリーンアーキテクチャ編
 変更に強く、テストがしやすいということで(もちろん他にも利点はたくさんある)最近何かと話題に上がることの多いクリーンアーキテクチャ。
@@ -659,7 +674,7 @@ A=>B=>Cという依存関係がコードがあるとする。AはBに依存し�
 詳しくは、[クリーンアーキテクチャ(The Clean Architecture翻訳) | blog.tai2.net](https://blog.tai2.net/the_clean_architecture.html)を参照。
 
 ### レイヤーとDIP
-詳しくは[Clean Architecture │ nrslib](https://nrslib.com/clean-architecture/)を参照いただきたいが、レイヤーを分けて、レイヤ間の境界をまたがるときには、疎結合になるようにDIPを用いることが多い。これを行うことで、あるレイヤのコードが変更になったときに、別のレイヤーに影響を及ぼしにくい。
+詳しくは[クリーンアーキテクチャ(The Clean Architecture翻訳) | blog.tai2.net](https://blog.tai2.net/the_clean_architecture.html)を参照いただきたいが、レイヤーを分けて、レイヤ間の境界をまたがるときには、疎結合になるようにDIPを用いることが多い。これを行うことで、あるレイヤのコードが変更になったときに、別のレイヤーに影響を及ぼしにくい。
 
 ## 単体テスト編に合致する点
 ### モックにできる
@@ -668,6 +683,7 @@ A=>B=>Cという依存関係がコードがあるとする。AはBに依存し�
 ## 実際のコード
 実際にコードを書いてみた。
 https://github.com/SekiguchiKai/clean-architecture-with-go
+
 
 ## 参考文献
 エリック・エヴァンス(著)、 今関 剛 (監修)、 和智 右桂  (翻訳) (2011/4/9)『エリック・エヴァンスのドメイン駆動設計 (IT Architects’Archive ソフトウェア開発の実践)』 翔泳社
@@ -709,6 +725,8 @@ Robert C.Martin (著)、 角 征典  (翻訳)、 高木 正弘 (翻訳)　(2018/
 [TDD > モック / スタブ - Qiita](https://qiita.com/7of9/items/8e2cb2070f2b2ea4e5ec)等で確認いただきたい。
 
 ### クリーンアーキテクチャ 編
+[The Clean Architecture | 8th Light](https://8thlight.com/blog/uncle-bob/2012/08/13/the-clean-architecture.html)
+
 [クリーンアーキテクチャ(The Clean Architecture翻訳) | blog.tai2.net](https://blog.tai2.net/the_clean_architecture.html)
 
 [Clean Architecture │ nrslib](https://nrslib.com/clean-architecture/)
