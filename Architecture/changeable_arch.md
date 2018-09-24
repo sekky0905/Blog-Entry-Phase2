@@ -47,7 +47,7 @@
 引用元 : 
 アラン・シャロウェイ (著), ジェームズ・R・トロット (著), 村上 雅章 (翻訳)　(2014/3/11)『オブジェクト指向のこころ (SOFTWARE PATTERNS SERIES)』 丸善出版 113ページ
 
-自分なりに解釈すると、何かソフトウェアを設計する前には、そのソフトウェアによって解決する問題の中において、具体的な事象や物とその事象や物の抽象的なものを考え出す。
+自分なりに解釈すると、何かソフトウェアを設計する前には、そのソフトウェアによって解決する問題の中において、具体的な事象や物とそれらの抽象的な部分を見つけ出す。
 その具体的な事象や物は似たような部分がいくつかあって、それらに共通する振る舞いを集めた概念を見つけ出す。
 そして、具体的な事象や物は具象クラスに、共通する振る舞いをインターフェースや抽象クラスに落とし込んで設計していくのが大事なのだと思った。変化する具体的な問題とその問題に共通する抽象的な問題に分けるのだ。
 いわば、抽象と具体に分ける。
@@ -57,7 +57,6 @@
 例えば、AがBを呼んでおり、BがCを呼んでいるといった場合、依存関係は、A=>B=>Cといった具合になる。
 この場合、=>の向きは一方向である。しかし、場合によっては、A<=>B<=>Cといった具合に、矢印が双方向に向いている場合もある。これはAとBが互いに、BとCが互いに依存しあってしまっているのだ。これを循環依存という。
 これはコードを複雑にしてしまう要因らしい。
-Goだと、循環依存はエラーになるほどだ。
 
 参考:
 エリック・エヴァンス(著)、 今関 剛 (監修)、 和智 右桂  (翻訳) (2011/4/9)『エリック・エヴァンスのドメイン駆動設計 (IT Architects’Archive ソフトウェア開発の実践)』 翔泳社
@@ -73,10 +72,11 @@ Robert C.Martin (著)、 角 征典  (翻訳)、 高木 正弘 (翻訳)　(2018/
 ## 一旦整理
 コードには依存関係があることもわかった。依存関係は循環参照することなく、片方向の参照が好ましいという。では、Aの具象クラスがBの具象クラスに依存し、Bの具象クラスがCの具象クラスに依存するというのは、どうだろうか。
 
-「共通性/可変性分析」のセクションで、具体的なこと(具象クラス)は、変化しやすいことを説明した。本記事の冒頭を思い出してほしい。数々の良書が「変化に強くなろう」と主張しているのにも関わらず、片方向とはいえ、変更されやすい具象クラスに依存するのは良いのだろうか。
+「共通性/可変性分析」のセクションで、具体的なこと(具象クラス)は、変化しやすいことを説明した。本記事の冒頭を思い出してほしい。片方向とはいえ、変更されやすい具象クラスに依存するのは良いのだろうか。
 A=>B=>Cという風に依存関係があった場合、どれも具象クラスなので、変化しやすい。例えば、Cに変化があったら、Bはどうなるだろうか。Bに変化があったら、Aはどうなるだろうか...
 Bは、Cの変更に伴って、コードを変更しなくてはならないし、AもBの変更に伴ってコードを変更しなくてはならない...辛い...
-そりゃあ、数々の良書が「変更に強くなろう」というわけだ。「変更に強くなろう」というのは、「ある変更に伴いドミノ倒しのように発生する数々のコードの変更に耐えられる精神的な強さを持とう!」と言っているのだろうか。いや違う。ある変更があっても、他の部分に変更を(極力)生じさせない方法論を提唱してくれている。
+そりゃあ、数々の良書が「変更に強くなろう」というわけだ。「変更に強くなろう」というのは、「ある変更に伴いドミノ倒しのように発生する数々のコードの変更に耐えられる精神的な強さを持とう!」と言っているのだろうか。いや違う。
+ある変更があっても、他の部分に影響を(極力)生じさせない方法論を提唱してくれている。
 実際の方法論や考え方を見ていこう。
 
 ## インターフェースとポリモーフィズム
@@ -109,7 +109,9 @@ Bは、Cの変更に伴って、コードを変更しなくてはならないし
 
 引用元 : [依存性逆転の原則 - Wikipedia](https://ja.wikipedia.org/wiki/%E4%BE%9D%E5%AD%98%E6%80%A7%E9%80%86%E8%BB%A2%E3%81%AE%E5%8E%9F%E5%89%87)
 
-依存関係逆転の法則は、 `インターフェース` で `ポリモーフィズム` を用いて、モジュール間の結合度を緩やかにするためのもの。もっと具体的にいうと、別のレイヤーのクラスなどを使用するときには、その具象クラスを直接使うのではなく、そのインターフェースを参照しようねということ。AというクラスがBというクラスを利用するときに、Bを直接利用するのではなくて、Aの抽象(抽象クラスやインターフェイス)を利用するとBの実装に変更があっても左右されにくいので、そういう風にしましょうということ。
+依存関係逆転の法則は、 `インターフェース` で `ポリモーフィズム` を用いて、モジュール間の結合度を緩やかにするためのもの。
+もっと具体的にいうと、別のレイヤーのクラスなどを使用するときには、その具象クラスを直接使うのではなく、そのインターフェースを参照しようねということ。
+AというクラスがBというクラスを利用するときに、Bを直接利用するのではなくて、Bの抽象(抽象クラスやインターフェイス)を利用するとBの実装に変更があっても左右されにくいので、そういう風にしましょうということ。
 
 「共通性/可変性分析とインターフェースとポリモーフィズム」のセクションで記述した事を原則として切り出したものだ。
 「変更に強くなる」とか、「単体テストをしやすくする」などの事を考えると、この原則は本当に重要なものだ。
@@ -131,14 +133,16 @@ Bは、Cの変更に伴って、コードを変更しなくてはならないし
 
 これは後ほど記述するクリーンアーキテクチャで記述したコードの一部を切り取ったものだ。
 クリーンアーキテクチャやコード全体は後述する。
-この例では、ユースケースであるProgrammingLangUseCaseから使用されるデータベース周りの具体的な操作を行う構造体に焦点を当てる。
+この例では、ユースケースである`ProgrammingLangUseCase`から使用されるデータベース周りの具体的な操作を行う構造体に焦点を当てる。
 
-ProgrammingLangUseCaseから使用され、実際に操作を行うのはProgrammingLangDAOだが、ProgrammingLangUseCaseは、ProgrammingLangDAOをそのままProgrammingLangDAOとしては使用していない。(UseCaseやRepositoryについて、詳しくは[クリーンアーキテクチャ(The Clean Architecture翻訳) | blog.tai2.net](https://blog.tai2.net/the_clean_architecture.html)を参照)
-どうしているかというと、ProgrammingLangRepositoryというインターフェースを定義し、その実装としてProgrammingLangDAOを使用している。
-ProgrammingLangUseCaseは、ProgrammingLangRepositoryは知っているが、ProgrammingLangDAOは知らない。
+`ProgrammingLangUseCase`から使用され、実際に操作を行うのは`ProgrammingLangDAO`だが、ProgrammingLangUseCaseは、`ProgrammingLangDAO`をそのまま`ProgrammingLangDAO`としては使用していない。
+(UseCaseやRepositoryについて、詳しくは[クリーンアーキテクチャ(The Clean Architecture翻訳) | blog.tai2.net](https://blog.tai2.net/the_clean_architecture.html)を参照)
+どうしているかというと、`ProgrammingLangRepository`というインターフェースを定義し、その実装としてProgrammingLangDAOを使用している。
+ProgrammingLangUseCaseは、`ProgrammingLangRepository`は知っているが、`ProgrammingLangDAO`は知らない。
 
-なので、その部分はProgrammingLangRepositoryを実装している構造体ならば、何にでも差し替えることができる。
-例えば、今回は、ProgrammingLangDAOはRDB(MySQL)の操作を実装しているが、ProgrammingLangRepositoryのインターフェースを満たしたNoSQLを操作する構造体に差し替えることもできるかもしれないし、メモリに保存する構造体に差し替えすることもできる。また、単体テストの際に、モックに差し替えることができる。これは単体テストを行う際には大きなメリットとなる。(単体テストについては後述する)
+なので、その部分は `ProgrammingLangRepository` を実装している構造体ならば、何にでも差し替えることができる。
+例えば、今回は、`ProgrammingLangDAO`はRDB(MySQL)の操作を実装しているが、`ProgrammingLangRepository`のインターフェースを満たしたNoSQLを操作する構造体に差し替えることもできるかもしれないし、メモリに保存する構造体に差し替えすることもできる。
+また、単体テストの際に、モックに差し替えることができる。これは単体テストを行う際には大きなメリットとなる。(単体テストについては後述する)
 
 クラス図ぽいものを描くと以下のようなものになる。
 
@@ -146,13 +150,14 @@ ProgrammingLangUseCaseは、ProgrammingLangRepositoryは知っているが、Pro
 ![CleanArch.png](https://qiita-image-store.s3.amazonaws.com/0/145611/46c0f51b-5fa4-ad15-e33d-cbf9b38c3945.png)
 
 
-上記のUMLのようにProgrammingLangUseCase(上位のレイヤー)がProgrammingLangDAOや、MockProgrammingLangRepository(下位レイヤー)に直接依存するのではなく、ProgrammingLangRepository(下位レイヤーの抽象)に依存し、ProgrammingLangDAOや、MockProgrammingLangRepository(下位レイヤー)は、ProgrammingLangRepository(下位レイヤーの抽象)の実装のため、下位レイヤーから下位レイヤーの抽象へ矢印が逆向きになるため、依存関係逆転の法則というらしい。
+上記のUMLのように`ProgrammingLangUseCase`(上位のレイヤー)が`ProgrammingLangDAO`や、`MockProgrammingLangRepository`(下位レイヤー)に直接依存するのではなく、`ProgrammingLangRepository`(下位レイヤーの抽象)に依存し、`ProgrammingLangDAO`や、`MockProgrammingLangRepository`(下位レイヤー)は、`ProgrammingLangRepository`(下位レイヤーの抽象)の実装のため、下位レイヤーから下位レイヤーの抽象へ矢印が逆向きになるため、依存関係逆転の法則というらしい。
 
-!注意1 : なんとなくUML図ぽく買いたものである。(厳密なUML図ではない)<br>
+!注意1 : なんとなくUML図ぽく描いたものである。(厳密なUML図ではない)<br>
 !注意2 : 実際のコードにはもう少しメソッドがあるが、説明のためだけの図なので、図には書かない。<br>
 
 #### ProgrammingLangUseCase(上位レイヤ)
-ProgrammingLangUseCase は、ProgrammingLangRepositoryを通して、ProgrammingLangDAOやMockProgrammingLangRepositoryを使用する。そのため、ProgrammingLangUseCase は、直接的には、具象であるProgrammingLangDAOやMockProgrammingLangRepositoryを知らない。
+`ProgrammingLangUseCase`は、`ProgrammingLangRepository`を通して、`ProgrammingLangDAO`や`MockProgrammingLangRepository`を使用する。
+そのため、`ProgrammingLangUseCase`は、直接的には、具象である`ProgrammingLangDAO`や`MockProgrammingLangRepository`を知らない。
 
 ```go:program_lang_usecase.go
 
@@ -246,7 +251,9 @@ func (u *ProgrammingLangUseCase) Delete(ctx context.Context, id int) error {
 ```
 
 #### ProgrammingLangRepository(インターフェース部分)
-ここでは、実際のデータベースの操作のインターフェースを定義している。個々のデータベースの操作(例えば、MySQLやPostgreSQL、あるいはそれを模したモックなど)という具体的なことに対して、ここで定義しているのは、データベースの操作をまとめた抽象的なものであることに注目して欲しい。これは、具体的なものが共通でもつ変わりにくい抽象的な部分をインターフェースで表したものだ。
+ここでは、実際のデータベースの操作のインターフェースを定義している。
+個々のデータベースの操作(例えば、MySQLやPostgreSQL、あるいはそれを模したモックなど)という具体的なことに対して、ここで定義しているのは、データベースの操作をまとめた抽象的なものであることに注目して欲しい。
+これは、具体的なものが共通でもつ変わりにくい抽象的な部分をインターフェースで表したものだ。
 
 ```go:program_lang_repository.go
 package repository
@@ -270,7 +277,11 @@ type ProgrammingLangRepository interface {
 
 #### ProgrammingLangDAO(データベース操作実装部分)
 具体的なSQL型のデータベースの操作を行う構造体(Javaとかでいうところのクラスみたいなもの)。
-`ProgrammingLangRepository` で定義した各メソッドを実装している。ProgrammingLangDAOは、ProgrammingLangRepositoryを満たしているので、ProgrammingLangRepositoryとして使用することができる。
+`ProgrammingLangRepository`で定義した各メソッドを実装している。
+`NewProgrammingLangDAO`は、`ProgrammingLangRepository`を満たしているので、`ProgrammingLangRepository`として使用することができる。
+`NewProgrammingLangDAO`で、`ProgrammingLangDAO`を生成しているが、返り値の型としては `ProgrammingLangDAO`そのものではなく、
+`ProgrammingLangRepository`型で返していることがわかる。
+こうすることで、 `ProgrammingLangDAO`を使用する側は、直接`ProgrammingLangDAO`のことを知らなくても利用可能になる。
 
 
 ```go:program_lang_dao.go
@@ -484,7 +495,7 @@ func (dao *ProgrammingLangDAO) Delete(ctx context.Context, id int) error {
 #### MockProgrammingLangRepository(モック)
 データベースの操作を模したモック。
 [gomock](https://github.com/golang/mock)というモック生成用のツールで自動生成している。
-モックの構造体もProgrammingLangRepositoryを満たしているので、ProgrammingLangRepositoryとして使用することができる。実際にProgrammingLangRepository(の実装)を使用するレイヤーのテストをする際には、ProgrammingLangRepositoryの実装としてProgrammingLangDAOではなく、このモックを使用する。
+モックの構造体もProgrammingLangRepositoryを満たしているので、`ProgrammingLangRepository`として使用することができる。実際に`ProgrammingLangRepository`(の実装)を使用するレイヤーのテストをする際には、`ProgrammingLangRepository`の実装として`ProgrammingLangDAO`ではなく、このモックを使用する。
 
 ```go:program_lang_repository_mock.go
 
