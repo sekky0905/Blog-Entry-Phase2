@@ -495,7 +495,7 @@ func (dao *ProgrammingLangDAO) Delete(ctx context.Context, id int) error {
 #### MockProgrammingLangRepository(モック)
 データベースの操作を模したモック。
 [gomock](https://github.com/golang/mock)というモック生成用のツールで自動生成している。
-モックの構造体もProgrammingLangRepositoryを満たしているので、`ProgrammingLangRepository`として使用することができる。実際に`ProgrammingLangRepository`(の実装)を使用するレイヤーのテストをする際には、`ProgrammingLangRepository`の実装として`ProgrammingLangDAO`ではなく、このモックを使用する。
+モックの構造体も`ProgrammingLangRepository`を満たしているので、`ProgrammingLangRepository`として使用することができる。実際に`ProgrammingLangRepository`(の実装)を使用するレイヤーのテストをする際には、`ProgrammingLangRepository`の実装として`ProgrammingLangDAO`ではなく、このモックを使用する。
 
 ```go:program_lang_repository_mock.go
 
@@ -616,6 +616,7 @@ func (mr *MockProgrammingLangRepositoryMockRecorder) Delete(ctx, id interface{})
 
 # 単体テスト編
 このセクションは、以下の2つの記事を大変参考にさせていただいた。
+
 [mercari.go #1 で「もう一度テストパターンを整理しよう」というタイトルで登壇しました - アルパカ三銃士](https://codehex.hateblo.jp/entry/2018/07/03/211839)
 
 [Goにおけるテスト可能な設計](https://www.slideshare.net/shogoosawa581/go-77254684)
@@ -623,10 +624,10 @@ func (mr *MockProgrammingLangRepositoryMockRecorder) Delete(ctx, id interface{})
 ### そもそも単体テストとは何かということを振り返る
 単体テストについての説明は色々とあると思うが機能テストと比較して書かれた以下の説明がわかりやすい。
 
-> Unit test(単体テスト)
-　・単一の関数やメソッドなどをテスト
-> Functional test(機能テスト)
-　・リクエストからレスポンスまでのテスト
+> Unit test(単体テスト)<br>
+　・単一の関数やメソッドなどをテスト<br>
+> Functional test(機能テスト)<br>
+　・リクエストからレスポンスまでのテスト<br>
 
 引用元 : [mercari.go #1 で「もう一度テストパターンを整理しよう」というタイトルで登壇しました - アルパカ三銃士](https://codehex.hateblo.jp/entry/2018/07/03/211839)
 
@@ -649,7 +650,7 @@ func (mr *MockProgrammingLangRepositoryMockRecorder) Delete(ctx, id interface{})
 
 ## 単体テストでインターフェースをうまく利用する
 先ほど、引用で単体テストは「単一の関数やメソッドなどをテスト」するということがわかった。
-A=>B=>Cという依存関係がコードがあるとする。AはBに依存し、BはCに依存するとする。この場合、Aのテストを行おうとすると、BやCまで呼び出す必要が出て来てしまう。
+A=>B=>Cという依存関係がコードに存在するとする(A、B、Cは各レイヤのコード)。AはBに依存し、BはCに依存するとする。この場合、Aのテストを行おうとすると、BやCまで呼び出す必要が出て来てしまう。
 先ほどの単体テストの定義だと、Aの単体テストはAのみをテストするものなはずなのに、A以外のBやCも利用することになってしまう。
 これは真の意味で単体テストと言えるのだろうか...
 
@@ -658,7 +659,7 @@ A=>B=>Cという依存関係がコードがあるとする。AはBに依存し�
 実際の例は、先ほどのDIP(依存関係逆転の法則)のセクションで示したものを参照いただきたい。原理としては、Aの単体テストをする際に、依存しているBやCをそのまま使うのではなく、Bをモックに入れ替えている。
 これは、AからBを利用する際に、Bの具象クラスをそのまま利用するのではなくて、Bの具象クラスがその実装となるインターフェイスを定義して、それをAは利用しているからなせる技だ。
 
-具体的にいうとProgrammingLangRepositoryというインターフェースを定義し、製品コードではこのProgrammingLangRepositoryの実装であるProgrammingLangDAOを使用してDBの操作を行い、ProgrammingLangUseCaseのテストでは、ProgrammingLangRepository実装であるMockProgrammingLangRepositoryに差し替えているのだ。
+具体的にいうと`ProgrammingLangRepository`というインターフェースを定義し、製品コードではこの`ProgrammingLangRepository`の実装である`ProgrammingLangDAO`を使用してDBの操作を行い、`ProgrammingLangUseCase`のテストでは、`ProgrammingLangRepository`実装である`MockProgrammingLangRepository`に差し替えているのだ。
 モックもインターフェースを実装した具象クラスの1つであるというわけだ。
 
 **ProgrammingLangDAO is a ProgrammingLanRepository** であり、<br>
@@ -666,7 +667,7 @@ A=>B=>Cという依存関係がコードがあるとする。AはBに依存し�
 
 # クリーンアーキテクチャ編
 変更に強く、テストがしやすいということで(もちろん他にも利点はたくさんある)最近何かと話題に上がることの多いクリーンアーキテクチャ。
-これの何が優れているのかということをこれまでの説明から紐解きたい。
+これの何が優れているのかということをこれまでの説明に沿って考えてみたい。
 ただし、既にクリーンアーキテクチャの優れた部分は他の記事等でも紹介されているので、ここでは、これまでの記事の内容に沿ったものだけに焦点を当てたい。
 
 このセクションでは以下の記事を非常に参考にさせていただいた。
@@ -680,12 +681,18 @@ A=>B=>Cという依存関係がコードがあるとする。AはBに依存し�
 
 ## 変更に強くなる編に合致する点
 ### 依存の方向性
-> 内側に向かってのみ依存することができる。
-というように循環依存しないようにする。
+> このアーキテクチャを機能させる重要なルールが、依存ルールだ。<br>
+このルールにおいては、ソースコードは、内側に向かってのみ依存することができる
+
+引用元 : [クリーンアーキテクチャ(The Clean Architecture翻訳) | blog.tai2.net](https://blog.tai2.net/the_clean_architecture.html)
+
+というようにクリーンアーキテクチャは、依存関係を片方向にのみにするとしている
 
 詳しくは、[クリーンアーキテクチャ(The Clean Architecture翻訳) | blog.tai2.net](https://blog.tai2.net/the_clean_architecture.html)を参照。
 
 ### レイヤーとDIP
+レイヤーの境界をまたがる時には、DIPを利用する。
+つまり、あるレイヤーから別のレイヤーを使用する時に、直接使用するレイヤーの具象に依存させるのではなく、その抽象に依存させるようにしている。
 詳しくは[クリーンアーキテクチャ(The Clean Architecture翻訳) | blog.tai2.net](https://blog.tai2.net/the_clean_architecture.html)を参照いただきたいが、レイヤーを分けて、レイヤ間の境界をまたがるときには、疎結合になるようにDIPを用いることが多い。これを行うことで、あるレイヤのコードが変更になったときに、別のレイヤーに影響を及ぼしにくい。
 
 ## 単体テスト編に合致する点
