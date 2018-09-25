@@ -153,10 +153,10 @@ AというクラスがBというクラスを利用するときに、Bを直接�
 クリーンアーキテクチャやコード全体は後述する。
 この例では、ユースケースである`ProgrammingLangUseCase`から使用されるデータベース周りの具体的な操作を行う構造体に焦点を当てる。
 
-`ProgrammingLangUseCase`から使用され、実際に操作を行うのは`ProgrammingLangDAO`だが、ProgrammingLangUseCaseは、`ProgrammingLangDAO`をそのまま`ProgrammingLangDAO`としては使用していない。
+`ProgrammingLangUseCase`から使用され、実際に操作を行うのは`ProgrammingLangDAO`だが、`ProgrammingLangUseCase`は、`ProgrammingLangDAO`をそのまま`ProgrammingLangDAO`としては使用していない。
 (UseCaseやRepositoryについて、詳しくは[クリーンアーキテクチャ(The Clean Architecture翻訳) | blog.tai2.net](https://blog.tai2.net/the_clean_architecture.html)を参照)
-どうしているかというと、`ProgrammingLangRepository`というインターフェースを定義し、その実装としてProgrammingLangDAOを使用している。
-ProgrammingLangUseCaseは、`ProgrammingLangRepository`は知っているが、`ProgrammingLangDAO`は知らない。
+どうしているかというと、`ProgrammingLangRepository`というインターフェースを定義し、その実装として`ProgrammingLangDAO`を使用している。
+`ProgrammingLangUseCase`は、`ProgrammingLangRepository`は知っているが、`ProgrammingLangDAO`は知らない。
 
 なので、その部分は `ProgrammingLangRepository` を実装している構造体ならば、何にでも差し替えることができる。
 例えば、今回は、`ProgrammingLangDAO`はRDB(MySQL)の操作を実装しているが、`ProgrammingLangRepository`のインターフェースを満たしたNoSQLを操作する構造体に差し替えることもできるかもしれないし、メモリに保存する構造体に差し替えすることもできる。
