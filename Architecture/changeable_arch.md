@@ -55,7 +55,8 @@
 ## 依存関係
 コードには依存関係が存在する。
 例えば、AがBを呼んでおり、BがCを呼んでいるといった場合、依存関係は、A=>B=>Cといった具合になる。
-この場合、=>の向きは一方向である。しかし、場合によっては、A<=>B<=>Cといった具合に、矢印が双方向に向いている場合もある。これはAとBが互いに、BとCが互いに依存しあってしまっているのだ。これを循環依存という。
+この場合、=>の向きは一方向である。しかし、場合によっては、A<=>B<=>Cといった具合に、矢印が双方向に向いている場合もある。
+これはAとBが互いに、BとCが互いに依存しあってしまっているのだ。これを循環依存という。
 これはコードを複雑にしてしまう要因らしい。
 
 参考:
@@ -77,7 +78,7 @@ Robert C.Martin (著)、 角 征典  (翻訳)、 高木 正弘 (翻訳)　(2018/
 「共通性/可変性分析」のセクションで、具体的なこと(具象クラス)は、変化しやすいことを説明した。
 片方向とはいえ、変更されやすい具象クラスに依存するのは良いのだろうか。
 
-A=>B=>Cという風に依存関係があった場合、どれも具象クラスなので、変化しやすい。
+A=>B=>Cという風に依存関係があった場合、どれも具象クラスなので変化しやすい。
 例えば、Cに変化があったら、Bはどうなるだろうか。Bに変化があったら、Aはどうなるだろうか...
 Bは、Cの変更に伴って、コードを変更しなくてはならないし、AもBの変更に伴ってコードを変更しなくてはならない...辛い...
 
@@ -89,7 +90,7 @@ Bは、Cの変更に伴って、コードを変更しなくてはならないし
 ## インターフェースとポリモーフィズム
 オブジェクト指向やデザインパターンを勉強していると必ず出てくするこの2つの言葉。
 変更に強くなるためには、この2つ(言語によっては抽象クラスなども含む)をうまく使うことが大事なようだ。
-共通性/可変性分析の項目で、変化しやすい具体的な事象や物と、それらに共通的する変わらない抽象を見つけるという話をしたが、このインターフェースとポリモーフィズムというのは、それらをうまく扱うことを可能にしてくれる。
+共通性/可変性分析の項目で変化しやすい具体的な事象や物とそれらに共通的する変わらない抽象を見つけるという話をしたが、このインターフェースとポリモーフィズムというのはそれらをうまく扱うことを可能にしてくれる。
 
 なお、この記事では、インターフェースとポリモーフィズム自体はある程度理解している前提で話を進めるので、それら自体の説明はあまりしない。
 もしインターフェースやポリモーフィズムが怪しい場合は、以下の記事等を参照。
@@ -205,7 +206,6 @@ func NewProgrammingLangUseCase(repo repository.ProgrammingLangRepository) input.
 
 // List は、ProgrammingLangの一覧を返す。
 func (u *ProgrammingLangUseCase) List(ctx context.Context, limit int) ([]*model.ProgrammingLang, error) {
-	limit = ManageLimit(limit, MaxLimit, MinLimit, DefaultLimit)
 	return u.Repo.List(ctx, limit)
 }
 
@@ -263,6 +263,16 @@ func (u *ProgrammingLangUseCase) Update(ctx context.Context, id int, param *mode
 
 // Delete は、ProgrammingLangを削除する。
 func (u *ProgrammingLangUseCase) Delete(ctx context.Context, id int) error {
+	lang, err := u.Repo.Read(ctx, id)
+	if lang == nil {
+		return  &model.NoSuchDataError{
+			ID:        id,
+			ModelName: model.ModelNameProgrammingLang,
+		}
+	} else if err != nil {
+		return  errors.WithStack(err)
+	}
+
 	return u.Repo.Delete(ctx, id)
 }
 
@@ -274,6 +284,7 @@ func (u *ProgrammingLangUseCase) Delete(ctx context.Context, id int) error {
 これは、具体的なものが共通でもつ変わりにくい抽象的な部分をインターフェースで表したものだ。
 
 ```go:program_lang_repository.go
+
 package repository
 
 import (
