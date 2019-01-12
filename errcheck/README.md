@@ -3,22 +3,6 @@ Goでエラーハンドリングをしているかどうかを静的に解析し
 
 [kisielk/errcheck: errcheck checks that you checked errors.](https://github.com/kisielk/errcheck/blob/master/README.md)を大変参考にさせていただいた。
 
-# インストール
-`go get -u github.com/kisielk/errcheck`
-
-# 基本的な使い方
-以下のコマンドは、
-[公式のREADME.md](https://github.com/kisielk/errcheck/blob/master/README.md)から引用。
-
-## package毎
-`package errcheck github.com/path/to/package`
-
-## カレントディレクトリ配下全部
-`errcheck ./...`
-
-##  $GOPATH and $GOROOT配下の全部のpackage
-`errcheck all`
-
 # 基本的な機能
 基本的な機能としては、エラーをチェックしているか(ハンドリング)しているかどうかをチェックしてくれる。
 例えば以下のようなコードがあった場合に、mainでvalidate関数を呼び出しているが、エラーハンドリングを行っていないため、`errcheck ./...` で下記のようなメッセージが表示される。
@@ -61,6 +45,23 @@ if err := validate(19); err != nil {
 }
 ```
 
+# インストール
+`go get -u github.com/kisielk/errcheck`
+
+# エラーチェックを行う対象の指定の仕方
+以下のコマンドは、
+[公式のREADME.md](https://github.com/kisielk/errcheck/blob/master/README.md)から引用。
+
+## 特定のpackageをチェックする
+`package errcheck github.com/path/to/package`
+
+## カレントディレクトリ配下全部をチェックする
+`errcheck ./...`
+
+##  $GOPATH and $GOROOT配下の全部のpackageをチェックする
+`errcheck all`
+
+# その他の機能
 ## エラーチェックしたくないものが存在する場合
 
 エラーチェックしたくないものもあるかもしれない。
