@@ -7,14 +7,13 @@ type Hoge interface {
 }
 
 type Foo struct {
-
 }
 
-func (f Foo)Method(arg string) {
+func (f Foo) Method(arg string) {
 	fmt.Println(arg)
 }
 
-func NewHoge()Hoge {
+func NewHoge() Hoge {
 	return &Foo{}
 }
 
@@ -24,6 +23,7 @@ func main() {
 }
 
 func Bar(arg interface{}) {
+	// hoge, ok := arg.(Hoge)で、okを確認した方が安全
 	hoge := arg.(Hoge)
 	hoge.Method("test")
 }

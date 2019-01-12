@@ -21,4 +21,3 @@ func validate(age int) error {
 	fmt.Println("ok~")
 	return nil
 }
-

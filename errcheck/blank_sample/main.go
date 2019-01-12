@@ -1,12 +1,13 @@
 package main
 
 import (
-"errors"
-"fmt"
+	"errors"
+	"fmt"
 )
 
 func main() {
-	 _ = validate(20)
+	// エラーハンドリングをblank
+	_ = validate(20)
 }
 
 func validate(age int) error {
