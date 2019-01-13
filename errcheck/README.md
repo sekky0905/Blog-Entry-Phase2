@@ -151,7 +151,7 @@ Goでは、関数やメソッドの戻り値を `_` で受け取って無視す�
 
 例えば以下のようなコードがあった場合に、mainでvalidate関数を呼び出しているが、validateが返すerrorを`_` で受け取って無視しているため、`errcheck -blank ./...` で下記のようなメッセージが表示される。
 
-まずはコードを。
+コード
 
 ```go
 package main
@@ -173,6 +173,12 @@ func validate(age int) error {
 	fmt.Println("ok~")
 	return nil
 }
+```
+
+メッセージ
+
+```
+blank_sample/main.go:10:2:	_ = validate(20)
 ```
 
 以下のようにすれば、上記のメッセージは表示されなくなる。
