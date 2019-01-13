@@ -78,7 +78,77 @@ if err := validate(19); err != nil {
 kisielk/errcheckには、いくつかオプションが存在する。
 
 ## -tag
-go buildのようにbuild tagsをつけることができる。
+tagsオプションを用いてエラーチェックを行っているか確認する対象のファイルを `build tags` によって切り替えることができる。
+
+例えば、以下のようなコードが存在するとする。
+
+コード
+
+```go:main.go
+package main
+
+func main() {
+	caller()
+}
+```
+
+```go:sample1.go
+// +build sample1
+
+package main
+
+import (
+	"errors"
+	"fmt"
+)
+
+func caller(){
+	worker()
+}
+
+func worker() error {
+	fmt.Println("sample1")
+	return errors.New("エラーだよ")
+}
+```
+
+```go:sample2.go
+// +build !sample1
+
+package main
+
+import "errors"
+
+func caller(){
+	worker()
+}
+
+func worker() error {
+	fmt.Println("sample2")
+	return errors.New("エラーだよ")
+}
+```
+
+Goでは `build tags` を使う上記のようなコードの場合、`go build -tags sample1` のような感じでビルドすると、 `+build !sample1` が記述されたsample1.goがビルドされる。
+
+参考 : [goで#ifdefのような条件分岐コンパイル - Qiita](https://qiita.com/yamasaki-masahide/items/8e5d59467dcf67d9b0be)
+[Goで任意のbuild tagsをつけてビルドファイルを切り替える - Qiita](https://qiita.com/ueokande/items/fac0d1219dbbc8f44db7)
+
+errcheckでも、tagsオプションを用いてエラーチェックを行っているか確認する対象のファイルを `build tags` で切り替えることができる。
+
+上記のようなコードで `errcheck -tags sample1 ./...` とすると以下のようなメッセージが表示される。
+
+メッセージ
+
+```
+sample1.go:11:8:	worker()
+```
+
+また、普通に `errcheck  ./...` とすると以下のようなメッセージが表示される。
+
+```
+sample2.go:11:8:	worker()
+```
 
 ## -asserts
 Goでは、 `t, ok := i.(T)` のような感じで型アサーションを行い、第二引数のokの部分で型アサーションが成功したかどうかを確認するとこができる。
@@ -189,5 +259,20 @@ if err := validate(20); err != nil {
 }
 ```
 
+## -abspath
+
+`errcheck -abspath ./...` のようにすると、以下のようにエラーチェックが行われていない箇所が存在するファイルの絶対パスも表示してくれる。
+
+メッセージ
+
+```
+/absolete/path/main.go:7:9: hoge()
+```
+
+
 # 参考にさせていただいたURL
 [errcheck/README.md at master · kisielk/errcheck](https://github.com/kisielk/errcheck/blob/master/README.md)
+
+[goで#ifdefのような条件分岐コンパイル - Qiita](https://qiita.com/yamasaki-masahide/items/8e5d59467dcf67d9b0be)
+
+[Goで任意のbuild tagsをつけてビルドファイルを切り替える - Qiita](https://qiita.com/ueokande/items/fac0d1219dbbc8f44db7)
