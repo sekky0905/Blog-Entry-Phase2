@@ -1,11 +1,11 @@
-Nuxt.js(Vue.js)とGoでSPA + API(レイヤードアーキテクチャ)でチャットアプリを実装してみた
+## Nuxt.js(Vue.js)とGoでSPA + API(レイヤードアーキテクチャ)でチャットアプリを実装してみた
 
-# 概要
+## 概要
 
 Nuxt.js(Vue.js)とレイヤードアーキテクチャのお勉強のために簡単なチャットアプリを実装してみた。
 SPA + APIと言った形になっている。
 
-# 機能
+## 機能
 
 機能はだいたい以下のような感じ。
 
@@ -22,16 +22,19 @@ SPA + APIと言った形になっている。
     - 自分のコメントのみ削除できること
 - ログアウト機能
 
-# コード
-コード全体は[ここ](https://github.com/sekky0905/nuxt-vue-go-chat)。
+## コード
 
-# 技術
+- コード全体は[ここ](https://github.com/sekky0905/nuxt-vue-go-chat)
+- コードは一例でもっと他の実装や良さそうな実装はありそう
 
-## サーバーサイド
 
-### アーキテクチャ
+## 技術
 
-DDD本に出てくるレイヤードアーキテクチャをベースに以下の書籍や記事を参考にさせていただき実装した。
+### サーバーサイド
+
+#### アーキテクチャ
+
+DDD本に出てくるレイヤードアーキテクチャをベースに以下の書籍や記事を参考にさせていただき実装した。超厳密なレイヤードアーキテクチャというわけではない。
 
 - [Goを運用アプリケーションに導入する際のレイヤ構造模索の旅路 | Go Conference 2018 Autumn 発表レポート - BASE開発チームブログ](https://devblog.thebase.in/entry/2018/11/26/102401)
 - [GoでのAPI開発現場のアーキテクチャ実装事例 / go-api-architecture-practical-example - Speaker Deck](https://speakerdeck.com/hgsgtk/go-api-architecture-practical-example)
@@ -44,12 +47,12 @@ DDD本に出てくるレイヤードアーキテクチャをベースに以下�
 ```
 ├── interface
 │   └── controller // サーバへの入力と出力を扱う責務。
-├── application // 薄く保ち、やるべき作業の調整を行う責務。
+├── application // 作業の調整を行う責務。
 ├── domain
-│   ├── model // ビジネスの概念とビジネスロジック。
+│   ├── model // ビジネスの概念とビジネスロジック(正直今回はそんなにビジネスロジックない...)
 │   ├── service // EntityでもValue Objectでもないドメイン層のロジック。
 │   └── repository // infra/dbへのポート。
-├── infra // 技術的なものの提供
+├── infra // 技術に関すること。
 │    ├── db // DBの技術に関すること。
 │    ├── logger // Logの技術に関すること。
 │    └── router // Routingの技術に関すること。 
@@ -58,9 +61,18 @@ DDD本に出てくるレイヤードアーキテクチャをベースに以下�
 └── testutil
 ```
 
-上記のpackage以外に `application/mock`、`domain/service/mock` 、`infra/db/mock` には、mockという格納する用のpackageもあり、そこに各々のレイヤーのmock用のファイルを置いている。(詳しくは後述)
+packageの切り方は以下を大変参考にさせていただいている。
 
-#### 依存関係
+- エリック・エヴァンス(著)、今関 剛 (監修)、和智 右桂 (翻訳) (2011/4/9)『エリック・エヴァンスのドメイン駆動設計 (IT Architects’Archive ソフトウェア開発の実践)』 翔泳社
+- pospome『pospomeのサーバサイドアーキテクチャ』
+- [Goを運用アプリケーションに導入する際のレイヤ構造模索の旅路 | Go Conference 2018 Autumn 発表レポート - BASE開発チームブログ](https://devblog.thebase.in/entry/2018/11/26/102401)
+- [ボトムアップドメイン駆動設計 │ nrslib](https://nrslib.com/bottomup-ddd/)
+- [GoでのAPI開発現場のアーキテクチャ実装事例 / go-api-architecture-practical-example - Speaker Deck](https://speakerdeck.com/hgsgtk/go-api-architecture-practical-example)
+
+
+上記のpackage以外に `application/mock`、`domain/service/mock` 、`infra/db/mock` というmockを格納する用のpackageもあり、そこに各々のレイヤーのmock用のファイルを置いている。(詳しくは後述)
+
+##### 依存関係
 
 依存関係としてはざっくり、`interface/controller` → `application` → `dmain/repository` or `dmain/service` ← `infra/db` という形になっている。
 
@@ -69,18 +81,18 @@ DDD本に出てくるレイヤードアーキテクチャをベースに以下�
 `domain/~` と `infra/db` で矢印が逆になっているのは、依存関係が逆転しているため。
 詳しくは [その設計、変更に強いですか?単体テストできますか?...そしてクリーンアーキテクチャ - Qiita](https://qiita.com/Sekky0905/items/2436d669ff5d4491c527)を参照。
 
-先ほどの矢印の中で、`domain/model` は記述しなかったが、 `domain/model` は、`interface/controller` や `application` 等からも依存されている。純粋なレイヤードアーキテクチャでは、各々のレイヤーは自分の下のレイヤーにのみ依存するといったものがあるかもしれないが、それを実現するためにDTO等を用意するのが大変だったから。
+先ほどの矢印の中で、`domain/model` は記述しなかったが、 `domain/model` は、`interface/controller` や `application` 等からも依存されている。純粋なレイヤードアーキテクチャでは、各々のレイヤーは自分の下のレイヤーにのみ依存するといったものがあるかもしれないが、それを実現するためにDTO等を用意する必要があって、今回の実装ではそこまで必要はないかなと思ったためそうした。(厳格にやる場合は、実装した方がいいかもしれない)
 
-#### 各レイヤーでのinterfaceの定義とテスト
+##### 各レイヤーでのinterfaceの定義とテスト
 
-`applicaion` 、 `/domain/service` 、`infra/db` (定義先は、`/domain/repository` ) には、 `interface` を定義し、他のレイヤーからはその `interface` に依存させるようにしている。こうするとこれらを使用する側は、抽象に依存するようになるので、抽象を実装する具象を変化させても、使用する側(依存する側)は、その影響を受けにくい。
+`applicaion` 、 `domain/service` 、`infra/db` (定義先は、`/domain/repository` ) には `interface` を定義し、他のレイヤーからはその `interface` に依存させるようにしている。こうするとこれらを使用する側は、抽象に依存するようになるので、抽象を実装する具象を変化させても使用する側(依存する側)はその影響を受けにくい。
 
-実際に各レイヤーを使用する側のレイヤのテストの際には、使用されるレイヤーを実際のコードではなく、Mock用のものに差し替えている。各々のレイヤーに存在する `mock` というpackageにmock用のコードを置いている。このモック用のコードは、[gomock](https://github.com/golang/mock)を使用して、自動生成している。
+実際に各レイヤーを使用する側のレイヤのテストの際には、使用されるレイヤーを実際のコードではなく、Mock用のものに差し替えている。各々のレイヤーに存在する `mock` というpackageにmock用のコードを置いている。このモック用のコードは、[gomock](https://github.com/golang/mock)を使用して自動生成している。
 
 この辺のことについては、
 [その設計、変更に強いですか?単体テストできますか?...そしてクリーンアーキテクチャ - Qiita](https://qiita.com/Sekky0905/items/2436d669ff5d4491c527#%E3%82%A4%E3%83%B3%E3%82%BF%E3%83%BC%E3%83%95%E3%82%A7%E3%83%BC%E3%82%B9%E3%81%A8%E3%83%9D%E3%83%AA%E3%83%A2%E3%83%BC%E3%83%95%E3%82%A3%E3%82%BA%E3%83%A0) という記事を以前書いたので、詳しくはこちらを参照いただきたい。
 
-### エラーハンドリング
+#### エラーハンドリング
 
 エラーハンドリングは以下のように行なっている。
 
@@ -88,7 +100,7 @@ DDD本に出てくるレイヤードアーキテクチャをベースに以下�
 
 ```go
 if err := Hoge(); err != nil {
-    return errors.Wrap(オリジナルエラー, '状況の説明'
+    return errors.Wrap(オリジナルエラー, "状況の説明"
 }
 ```
 
@@ -99,26 +111,26 @@ if err := Hoge(); err != nil {
 参考
 [Golangのエラー処理とpkg/errors | SOTA](https://deeeet.com/writing/2016/04/25/go-pkg-errors/)
 
-### ログイン周り
+#### ログイン周り
 
-- 外部サービスを使用せず、自前で簡単なものを実装した。
-- パスワードは [bcrypt](https://godoc.org/golang.org/x/crypto/bcrypt)を使用した
+- 外部サービスを使用せず、自前で簡単なものを実装した
+- パスワードのハッシュ化には [bcrypt](https://godoc.org/golang.org/x/crypto/bcrypt)を使用した
     - 参考[【Go言語】パスワードをハッシュ化(bcrypt) - まったり技術ブログ](https://blog.motikan2010.com/entry/2017/02/13/%E3%80%90Go%E8%A8%80%E8%AA%9E%E3%80%91%E3%83%91%E3%82%B9%E3%83%AF%E3%83%BC%E3%83%89%E3%82%92%E3%83%8F%E3%83%83%E3%82%B7%E3%83%A5%E5%8C%96%28bcrypt%29)
 - 普通にCookieとSessionを使用した
 - ログインが必要なAPIには `gin` の `middleware` を使用して、ログイン済みでないクライアントからのリクエストは `401 Unauthorized` を返すようにした
     - [gin middleware](https://github.com/gin-gonic/gin#using-middleware)
     - [GolangのWebフレームワークginのmiddlewareについての覚書 - Qiita](https://qiita.com/tobita0000/items/d2309cc3f0dd32006ead)
 
-### DB周り
+#### DB周り
 
 - MySQLを使用した
 - DBテスト部分は、DBサーバを立てたわけではなく、[DATA-DOG/go-sqlmock](https://github.com/DATA-DOG/go-sqlmock)を使用し、モックで行なった
-    - 以下を使用してDBサーバーを立てて行うのも良いかも
+    - [GoのAPIのテストにおける共通処理 – timakin – Medium](https://medium.com/@timakin/go-api-testing-173b97fb23ec)にあるように以下等を使用してDBサーバーを立てて行うのも良いかも
         - [ory/dockertest](https://github.com/ory/dockertest)
             - Dockerを使う場合
         - [lestrrat-go/test-mysqld](https://github.com/lestrrat-go/test-mysqld)
             - Dockerを使わない場合
-- DB操作周りの実装に関しては、[database/sql](https://golang.org/pkg/database/sql/)packageをそのまま使用し、ORMやその他のライブラリは特に使用していない
+- DB操作周りの実装に関しては、[database/sql](https://golang.org/pkg/database/sql/) packageをそのまま使用し、ORMやその他のライブラリは特に使用していない
 - トランザクションは、`application` レイヤでかける
 - 以下のようなSQL周りの `interface` を作成
     - 参考: [mercari.go #1 で「もう一度テストパターンを整理しよう」というタイトルで登壇しました - アルパカ三銃士](https://codehex.hateblo.jp/entry/2018/07/03/211839)
@@ -178,8 +190,8 @@ type (
 
 ```
 
-- `application` レイヤーでは以下のようにフィールで `query.DBManager` を所持する
-    - そうすることで `SQLManager` も `Begin()` し `TxManager` もどちらも `application` レイヤーで扱うことができる( `application` レイヤで直接使用するわけではなく、 `domain/repository` に渡す)
+- `application` レイヤーでは以下のようにフィールドで `query.DBManager` を所持する
+    - そうすることで `SQLManager` と `TxManager` (`Begin()` で生成)のどちらも `application` レイヤーで扱うことができる( `application` レイヤで直接使用するわけではなく、 `domain/repository` に渡す)
 
 ```go
 // threadService is application service of thread.
@@ -279,37 +291,38 @@ type threadService struct {
 }
 ```
 
-### 所感
+#### 所感
 
-- 依存関係が決まるのが良い
-- 各レイヤが疎結合なので変更しやすく、テストもしやすいのは良い
-- 各レイヤの責務がはっきり別れているので、どこに何を書けばいいかはわかりやすい
-- コード量は増えるので、実装に時間がかかる
-    - 決まったところは自動化できると良いかも
-    - CRUDだけの小さなアプリケーションでは、大げさすぎるかもしれない
+- レイヤードアーキテクチャは
+    - 依存関係がはっきりするのが良い
+    - 各レイヤが疎結合なので変更しやすく、テストもしやすいのは良い
+    - 各レイヤの責務がはっきり別れているので、どこに何を書けばいいかはわかりやすい
+    - コード量は増えるので、実装に時間がかかる
+        - 決まったところは自動化できると良いかも
+        - CRUDだけの小さなアプリケーションでは、大げさすぎるかもしれない
 
-## フロントエンド
+### フロントエンド
 
-### アーキテクチャ
+#### アーキテクチャ
 
-- 基本的には、Nuxt.jsのアーキテクチャに沿って実装を行なった。
+- 基本的には、Nuxt.jsのアーキテクチャに沿って実装を行なった
 - 状態管理に感じては、Vuexを使用した
     - 各々の `Component` 側( `pages` や `components` )からデータを使用したい場合には、Vuexを通じて使用した
     - データ、ロジックとビュー部分が綺麗に別れる
 
-### 見た目
+#### 見た目
 
 - [Vue.js](https://vuetifyjs.com/ja/)に全面的に乗っかった
 - コメントの一覧部分のCSSは [CSSで作る！吹き出しデザインのサンプル19選](https://saruwakakun.com/html-css/reference/speech-bubble) を参考にさせていただいた
 
-### 大きな流れ
+#### 大きな流れ
 
 大きな流れとしては、以下のような流れ。
-`pasges` や `components` 等のビューでのイベントの発生 → `actions` でAPIへリクエスト → `mutations` で `state` 変更 → `pasges` や `components` 等のビューに反映される
+`pasges` や `components` 等のビューでのイベントの発生 → `actions` 経由でAPIへリクエスト → `mutations` で `state` 変更 → `pasges` や `components` 等のビューに反映される
 
 他の流れもたくさんあるが、代表的なList処理とInput処理の流れを以下に記す。
 
-#### List処理
+##### List処理
 
 - `pages` や `components` の `asyncData` 内で、`store.dispatch` を通じて、データ一覧を取得するアクション( `actions` )を呼び出す
 - `store` の `actions` 内での処理を行う
@@ -319,7 +332,7 @@ type threadService struct {
     - `state` を変更する
 - `pages` や `components` のビューで取得したデータが表示される
 
-#### Input処理
+##### Input処理
 
 - `pages` や `components` で `stores` に定義した `action` や `state` を読み込んでおく
 - `pages` や `components` の `data` 部分とformのinput部分等に `v-model` を使用して双方向データバインディングをしておく
@@ -339,12 +352,12 @@ type threadService struct {
     - 登録した分のデータを一覧の `state` に追加する
 - `pages` や `components` のビューで登録したデータが追加された一覧表示される
 
-### 非同期部分
+#### 非同期部分
 
 - `async/await` で処理
     - [async await の使い方 - Qiita](https://qiita.com/niusounds/items/37c1f9b021b62194e077)
 
-### 所感
+#### 所感
 
 - Nuxt.jsを使用すると、レールに乗っかれて非常に楽
     - どこに何を実装すればいいか明白になるので迷わないで済む
@@ -352,23 +365,24 @@ type threadService struct {
         - データの流れが片方向になるのはわかりやすくて良い
         - ビュー、ロジック、データの責務がはっきりするのが良い
 - Vuetifyを使用するとあまり凝らない画面であれば、短期間で実装できそう
+- Componentの切り方を[Atomic Design](http://atomicdesign.bradfrost.com/chapter-2/)に則ったやり方とかにするともっといい感じに切り分けられたかもしれない
 
-# 参考文献
+## 参考文献
 
-## サーバーサイド
+### サーバーサイド
 
 - InfoQ.com、徳武 聡(翻訳) (2009年6月7日) 『Domain Driven Design（ドメイン駆動設計） Quickly 日本語版』 InfoQ.com
 - エリック・エヴァンス(著)、今関 剛 (監修)、和智 右桂 (翻訳) (2011/4/9)『エリック・エヴァンスのドメイン駆動設計 (IT Architects’Archive ソフトウェア開発の実践)』 翔泳社
 - pospome『pospomeのサーバサイドアーキテクチャ』
 
-## フロントエンド
+### フロントエンド
 - 花谷拓磨 (2018/10/17)『Nuxt.jsビギナーズガイド』シーアンドアール研究所
 - 川口 和也、喜多 啓介、野田 陽平、 手島 拓也、 片山 真也(2018/9/22)『Vue.js入門 基礎から実践アプリケーション開発まで』技術評論社
 
 
-# 参考にさせていただいた記事
+## 参考にさせていただいた記事
 
-## サーバーサイド
+### サーバーサイド
 
 - [Goを運用アプリケーションに導入する際のレイヤ構造模索の旅路 | Go Conference 2018 Autumn 発表レポート - BASE開発チームブログ](https://devblog.thebase.in/entry/2018/11/26/102401)
 
@@ -377,7 +391,7 @@ type threadService struct {
 - [GoのAPIのテストにおける共通処理 – timakin – Medium](https://medium.com/@timakin/go-api-testing-173b97fb23ec)
 - [mercari.go #1 で「もう一度テストパターンを整理しよう」というタイトルで登壇しました - アルパカ三銃士](https://codehex.hateblo.jp/entry/2018/07/03/211839)
 
-## フロントエンド
+### フロントエンド
 
 - [Nuxt.js - ユニバーサル Vue.js アプリケーション](https://ja.nuxtjs.org/)
 - [Vuex](https://vuex.vuejs.org/ja/)
@@ -385,6 +399,7 @@ type threadService struct {
 - [Vue.js](https://jp.vuejs.org/index.html)
 - [CSSで作る！吹き出しデザインのサンプル19選](https://saruwakakun.com/html-css/reference/speech-bubble)
 
-# 関連記事
+## 関連記事
 
 - [その設計、変更に強いですか?単体テストできますか?...そしてクリーンアーキテクチャ - Qiita](https://qiita.com/Sekky0905/items/2436d669ff5d4491c527)
+- [Goの構造体のフィールドに関数を埋め込んでDIを実現してみる - Qiita](https://qiita.com/Sekky0905/items/be5d83674a1aa78a397a)
